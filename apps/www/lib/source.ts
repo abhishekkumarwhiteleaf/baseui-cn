@@ -1,5 +1,5 @@
 import { loader } from "fumadocs-core/source"
-import { docs } from "collections"
+import { docs } from "collections/server"
 
 const docsSource = docs.toFumadocsSource()
 const resolvedDocsSource = (() => {

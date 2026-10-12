@@ -32,5 +32,15 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "latest-files", "more-updates-v1", "more-updates-v2", "app/more-updates-v1", "pending-components", "base-cn-logo", "new-files-claude", "docs-architecture"]
+  "exclude": [
+    "node_modules",
+    "latest-files",
+    "more-updates-v1",
+    "more-updates-v2",
+    "app/more-updates-v1",
+    "pending-components",
+    "base-cn-logo",
+    "new-files-claude",
+    "docs-architecture"
+  ]
 }

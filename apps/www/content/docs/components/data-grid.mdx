@@ -7,7 +7,8 @@ component: true
 <ComponentPreview name="data-grid-demo" />
 
 <Callout variant="info">
-  Use `data-grid` when you need filtering, editing, sticky headers, virtualization, or row and column movement. If you only need semantic table markup, keep using `table`.
+  Use `data-grid` when you need filtering, editing, sticky headers, virtualization, or row and
+  column movement. If you only need semantic table markup, keep using `table`.
 </Callout>
 
 ## Installation
@@ -33,26 +34,23 @@ The installable includes the reusable family files, the editable-grid hook, and 
 
 ## Examples
 
-### Basic Directory Grid
+### Feature Toggle Demo
 
-<ComponentPreview name="data-grid-basic" />
+<ComponentPreview name="data-grid-demo" />
 
-This is the lightweight entry point: sortable columns, structured cells, sticky pagination, and the composable container pieces you reuse across the family.
+Use the switches above the table to turn Excel-like filters, inline editing, row pinning,
+row reordering, column pinning, menu-based column reordering, and column drag-and-drop on
+or off independently. The demo uses the existing DataGrid filter menus and editing
+metadata, along with the Base UI CN table and drag-and-drop primitives.
 
-### Inline Editing And Generated Dialog
-
-<ComponentPreview name="data-grid-editing" />
-
-This example shows the shared editing metadata model. The same column definitions power inline cells and the generated edit dialog.
-
-### Async Editing With Optimistic Rollback
-
-<ComponentPreview name="data-grid-async-editing" />
-
-This variant layers in pending states, optimistic updates, and rollback messaging while keeping the same grid primitives and edit flow.
+The rows are provided by a frontend-only data source with a typed query and mutation
+contract. Its mock implementation serves the full dataset for TanStack's client-side
+filtering, sorting, and pagination. A server-backed implementation can use the same query
+contract for server-side filtering, sorting, and pagination without changing the table's
+feature controls or column definitions.
 
 ## Included Pieces
 
 - `DataGrid`, `DataGridTable`, `DataGridScrollArea`, and `DataGridPagination` for the base shell.
-- `DataGridColumnHeader`, filter, visibility, virtual, and drag-and-drop helpers for richer table behavior.
+- `DataGridColumnHeader`, facet filters, Excel-style text/number/date filters, visibility, virtual, and drag-and-drop helpers for richer table behavior.
 - `DataGridEditableCell`, `DataGridEditDialog`, and `useEditableDataGrid` for inline and dialog editing flows.

@@ -2,6 +2,8 @@
 
 import { type HTMLAttributes, memo, type ReactNode, useMemo } from "react"
 import { getColumnHeaderLabel, useDataGrid } from "@/components/data-grid/data-grid"
+import { DataGridFilterMenu } from "@/components/data-grid/data-grid-filter-menu"
+import type { ExcelFilterType } from "@/types/data-grid-filter"
 import { type Column } from "@tanstack/react-table"
 
 import { cn } from "@/lib/utils"
@@ -39,6 +41,7 @@ interface DataGridColumnHeaderProps<TData, TValue> extends HTMLAttributes<HTMLDi
   icon?: ReactNode
   pinnable?: boolean
   filter?: ReactNode
+  filterType?: ExcelFilterType
   visibility?: boolean
 }
 
@@ -48,6 +51,7 @@ function DataGridColumnHeaderInner<TData, TValue>({
   icon,
   className,
   filter,
+  filterType,
   visibility = false,
 }: DataGridColumnHeaderProps<TData, TValue>) {
   const { isLoading, table, props, recordCount } = useDataGrid()
@@ -94,6 +98,10 @@ function DataGridColumnHeaderInner<TData, TValue>({
     ) : (
       <ChevronsUpDownIcon className="mt-px size-3.25" />
     ))
+
+  const filterControl = filterType ? (
+    <DataGridFilterMenu column={column} type={filterType} title={resolvedTitle} />
+  ) : null
 
   const hasControls =
     props.tableLayout?.columnsMovable ||
@@ -276,24 +284,27 @@ function DataGridColumnHeaderInner<TData, TValue>({
   if (hasControls) {
     return (
       <div className="flex h-full items-center justify-between gap-1.5">
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <Button
-                variant="ghost"
-                className={headerButtonClassName}
-                disabled={isLoading || recordCount === 0}
-              />
-            }
-          >
-            {icon && icon}
-            {resolvedTitle}
-            {sortIcon}
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-40" align="start">
-            {menuItems}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex min-w-0 items-center gap-1">
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  className={headerButtonClassName}
+                  disabled={isLoading || recordCount === 0}
+                />
+              }
+            >
+              {icon && icon}
+              {resolvedTitle}
+              {sortIcon}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-40" align="start">
+              {menuItems}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          {filterControl}
+        </div>
         {props.tableLayout?.columnsPinnable && canPin && isPinned && (
           <Button
             size="icon-sm"
@@ -312,7 +323,7 @@ function DataGridColumnHeaderInner<TData, TValue>({
 
   if (canSort || (props.tableLayout?.columnsResizable && canResize)) {
     return (
-      <div className="flex h-full items-center">
+      <div className="flex h-full items-center gap-1">
         <Button
           variant="ghost"
           className={headerButtonClassName}
@@ -323,14 +334,18 @@ function DataGridColumnHeaderInner<TData, TValue>({
           {resolvedTitle}
           {sortIcon}
         </Button>
+        {filterControl}
       </div>
     )
   }
 
   return (
-    <div className={headerLabelClassName}>
-      {icon && icon}
-      {resolvedTitle}
+    <div className="flex h-full items-center justify-between gap-1">
+      <div className={headerLabelClassName}>
+        {icon && icon}
+        {resolvedTitle}
+      </div>
+      {filterControl}
     </div>
   )
 }
