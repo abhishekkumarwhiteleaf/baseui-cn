@@ -7,7 +7,6 @@ import { DataGridColumnHeader } from "@/components/data-grid/data-grid-column-he
 import { DataGridPagination } from "@/components/data-grid/data-grid-pagination"
 import { DataGridScrollArea } from "@/components/data-grid/data-grid-scroll-area"
 import { DataGridTable } from "@/components/data-grid/data-grid-table"
-import { createExcelFilterFn } from "@/sections/common-filters"
 import {
   type ColumnDef,
   getCoreRowModel,
@@ -248,19 +247,13 @@ export function Pattern() {
         accessorKey: "name",
         id: "name",
         header: ({ column }) => (
-          <DataGridColumnHeader
-            title="Staff"
-            column={column}
-            filterType="text"
-            className="px-4 py-2"
-          />
+          <DataGridColumnHeader title="Staff" column={column} className="px-4 py-2" />
         ),
         size: 100,
         enablePinning: true,
         enableResizing: true,
         enableSorting: true,
         enableHiding: false,
-        filterFn: createExcelFilterFn<IData>(),
         cell: ({ row }) => {
           return (
             <div className="flex items-center gap-3">
@@ -287,9 +280,7 @@ export function Pattern() {
       {
         accessorKey: "role",
         id: "role",
-        header: ({ column }) => (
-          <DataGridColumnHeader title="Occupation" column={column} filterType="text" />
-        ),
+        header: ({ column }) => <DataGridColumnHeader title="Occupation" column={column} />,
         cell: ({ row }) => {
           return (
             <div className="space-y-0.5">
@@ -303,7 +294,6 @@ export function Pattern() {
         enableResizing: true,
         enableSorting: true,
         enableHiding: false,
-        filterFn: createExcelFilterFn<IData>(),
         meta: {
           cellClassName: "px-4 py-2",
         },
@@ -311,9 +301,7 @@ export function Pattern() {
       {
         accessorKey: "status",
         id: "status",
-        header: ({ column }) => (
-          <DataGridColumnHeader title="Status" column={column} filterType="text" />
-        ),
+        header: ({ column }) => <DataGridColumnHeader title="Status" column={column} />,
         cell: ({ row }) => {
           const status = row.original.status
 
@@ -325,7 +313,6 @@ export function Pattern() {
         },
         size: 100,
         enableResizing: false,
-        filterFn: createExcelFilterFn<IData>(),
         meta: {
           cellClassName: "px-4 py-2",
         },
