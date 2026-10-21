@@ -10,7 +10,7 @@ export type StaffStatus = "Active" | "On leave" | "Probation"
 export interface StaffMember {
   id: string
   name: string
-  department: string
+  team: string
   title: string
   salary: number
   startDate: string
@@ -21,7 +21,7 @@ const staffRows: StaffMember[] = [
   {
     id: "staff-1001",
     name: "Avery Miles",
-    department: "Design",
+    team: "Design",
     title: "Product Designer",
     salary: 92000,
     startDate: "2022-04-18",
@@ -30,7 +30,7 @@ const staffRows: StaffMember[] = [
   {
     id: "staff-1002",
     name: "Jordan Lee",
-    department: "Engineering",
+    team: "Engineering",
     title: "Frontend Engineer",
     salary: 108000,
     startDate: "2021-09-06",
@@ -39,7 +39,7 @@ const staffRows: StaffMember[] = [
   {
     id: "staff-1003",
     name: "Naomi Cruz",
-    department: "Engineering",
+    team: "Engineering",
     title: "Engineering Manager",
     salary: 132000,
     startDate: "2019-02-11",
@@ -48,7 +48,7 @@ const staffRows: StaffMember[] = [
   {
     id: "staff-1004",
     name: "Ethan Brooks",
-    department: "Product",
+    team: "Product",
     title: "Product Manager",
     salary: 105000,
     startDate: "2023-06-12",
@@ -57,7 +57,7 @@ const staffRows: StaffMember[] = [
   {
     id: "staff-1005",
     name: "Camila Stone",
-    department: "Design",
+    team: "Design",
     title: "Content Designer",
     salary: 88000,
     startDate: "2020-11-02",
@@ -66,7 +66,7 @@ const staffRows: StaffMember[] = [
   {
     id: "staff-1006",
     name: "Micah Patel",
-    department: "Engineering",
+    team: "Engineering",
     title: "Software Engineer",
     salary: 101000,
     startDate: "2022-01-24",
@@ -75,7 +75,7 @@ const staffRows: StaffMember[] = [
   {
     id: "staff-1007",
     name: "Riley Chen",
-    department: "Operations",
+    team: "Operations",
     title: "Operations Lead",
     salary: 97000,
     startDate: "2020-07-20",
@@ -84,7 +84,7 @@ const staffRows: StaffMember[] = [
   {
     id: "staff-1008",
     name: "Morgan James",
-    department: "Product",
+    team: "Product",
     title: "Product Analyst",
     salary: 84000,
     startDate: "2024-03-04",
@@ -128,9 +128,7 @@ export function createMockStaffDataSource(): DataGridFeatureDataSource<StaffMemb
 
       const nextRows = [...rows]
       const [movedRow] = nextRows.splice(fromIndex, 1)
-      const nextIndex = move.nextRowId
-        ? nextRows.findIndex((row) => row.id === move.nextRowId)
-        : -1
+      const nextIndex = move.nextRowId ? nextRows.findIndex((row) => row.id === move.nextRowId) : -1
       const previousIndex = move.previousRowId
         ? nextRows.findIndex((row) => row.id === move.previousRowId)
         : -1
@@ -142,8 +140,7 @@ export function createMockStaffDataSource(): DataGridFeatureDataSource<StaffMemb
         throw new Error(`Cannot find previous staff row "${move.previousRowId}".`)
       }
 
-      const insertionIndex =
-        nextIndex >= 0 ? nextIndex : previousIndex >= 0 ? previousIndex + 1 : 0
+      const insertionIndex = nextIndex >= 0 ? nextIndex : previousIndex >= 0 ? previousIndex + 1 : 0
       nextRows.splice(insertionIndex, 0, movedRow)
       rows = nextRows
     },

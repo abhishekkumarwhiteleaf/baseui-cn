@@ -2,14 +2,15 @@
 
 import { createContext, type ReactNode, useContext, useMemo } from "react"
 import {
-  type Column,
+  type CellData,
   type ColumnFiltersState,
   type RowData,
   type SortingState,
-  type Table,
+  type TableFeatures,
 } from "@tanstack/react-table"
 
 import { cn } from "@/lib/utils"
+import type { DataGridColumn, DataGridTable } from "@/components/data-grid/table-features"
 
 export type DataGridEditorKind =
   | "text"
@@ -33,7 +34,7 @@ export interface DataGridColumnEditorRenderProps<
   TData extends RowData = RowData,
   TValue = unknown,
 > {
-  table: Table<TData>
+  table: DataGridTable<TData>
   row: TData
   rowId: string
   columnId: string
@@ -41,6 +42,7 @@ export interface DataGridColumnEditorRenderProps<
   setValue: (value: TValue) => void
   commit: (value?: TValue) => Promise<boolean>
   cancel: () => void
+  navigate?: (direction: "next" | "previous") => void
   isEditing: boolean
   isPending: boolean
   error?: string | null
@@ -93,7 +95,11 @@ export interface DataGridEditingTableMeta<TData extends RowData = RowData> {
 }
 
 declare module "@tanstack/react-table" {
-  interface ColumnMeta<TData extends RowData, TValue> {
+  interface ColumnMeta<
+    TFeatures extends TableFeatures,
+    TData extends RowData,
+    TValue extends CellData = CellData,
+  > {
     headerTitle?: string
     headerClassName?: string
     cellClassName?: string
@@ -102,13 +108,15 @@ declare module "@tanstack/react-table" {
     editor?: DataGridColumnEditor<TData, TValue>
   }
 
-  interface TableMeta<TData extends RowData> {
+  interface TableMeta<TFeatures extends TableFeatures, TData extends RowData> {
     editing?: DataGridEditingTableMeta<TData>
   }
 }
 
 /** Label for headers / column visibility: `meta.headerTitle`, string `columnDef.header`, or `column.id`. */
-export function getColumnHeaderLabel<TData, TValue>(column: Column<TData, TValue>): string {
+export function getColumnHeaderLabel<TData extends RowData, TValue>(
+  column: DataGridColumn<TData, TValue>
+): string {
   const meta = column.columnDef.meta as { headerTitle?: string } | undefined
   if (typeof meta?.headerTitle === "string") return meta.headerTitle
   const defHeader = column.columnDef.header
@@ -116,8 +124,8 @@ export function getColumnHeaderLabel<TData, TValue>(column: Column<TData, TValue
   return String(column.id)
 }
 
-export function getDataGridColumnEditor<TData, TValue>(
-  column: Column<TData, TValue>
+export function getDataGridColumnEditor<TData extends RowData, TValue>(
+  column: DataGridColumn<TData, TValue>
 ): DataGridColumnEditor<TData, TValue> | undefined {
   return column.columnDef.meta?.editor as DataGridColumnEditor<TData, TValue> | undefined
 }
@@ -139,9 +147,9 @@ export type DataGridApiResponse<T> = {
   }
 }
 
-export interface DataGridContextProps<TData extends object> {
+export interface DataGridContextProps<TData extends RowData> {
   props: DataGridProps<TData>
-  table: Table<TData>
+  table: DataGridTable<TData>
   recordCount: number
   isLoading: boolean
 }
@@ -153,9 +161,9 @@ export type DataGridRequestParams = {
   columnFilters?: ColumnFiltersState
 }
 
-export interface DataGridProps<TData extends object> {
+export interface DataGridProps<TData extends RowData> {
   className?: string
-  table?: Table<TData>
+  table?: DataGridTable<TData>
   recordCount: number
   children?: ReactNode
   onRowClick?: (row: TData) => void
@@ -196,32 +204,31 @@ export interface DataGridProps<TData extends object> {
   }
 }
 
-const DataGridContext = createContext<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  DataGridContextProps<any> | undefined
->(undefined)
+// The generic data type is rebound by useDataGrid at the context boundary.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ErasedDataGridContextProps = DataGridContextProps<any>
+type ErasedDataGridRowData = ErasedDataGridContextProps["table"] extends DataGridTable<
+  infer TData
+>
+  ? TData
+  : never
 
-function useDataGrid() {
+const DataGridContext = createContext<ErasedDataGridContextProps | undefined>(undefined)
+
+function useDataGrid<TData extends RowData = ErasedDataGridRowData>(): DataGridContextProps<TData> {
   const context = useContext(DataGridContext)
   if (!context) {
     throw new Error("useDataGrid must be used within a DataGridProvider")
   }
-  return context
+  return context as DataGridContextProps<TData>
 }
 
-function DataGridProvider<TData extends object>({
+function DataGridProvider<TData extends RowData>({
   children,
   table,
   ...props
-}: DataGridProps<TData> & { table: Table<TData> }) {
-  const tableState = table.getState()
-  const resolvedColumnsResizeMode = props.tableLayout?.columnsResizeMode ?? "onEnd"
-
-  // Keep resize mode aligned with the DataGrid contract every render so
-  // consumer-level useReactTable options cannot flip it back between drags.
-  if (props.tableLayout?.columnsResizable) {
-    table.options.columnResizeMode = resolvedColumnsResizeMode
-  }
+}: DataGridProps<TData> & { table: DataGridTable<TData> }) {
+  const tableState = table.store.state
 
   // Memoize context value so consumers don't re-render during column resize.
   // Column sizing state is intentionally excluded from deps -- CSS variables
@@ -261,10 +268,14 @@ function DataGridProvider<TData extends object>({
     ]
   )
 
-  return <DataGridContext.Provider value={value}>{children}</DataGridContext.Provider>
+  return (
+    <DataGridContext.Provider value={value as ErasedDataGridContextProps}>
+      {children}
+    </DataGridContext.Provider>
+  )
 }
 
-function DataGrid<TData extends object>({ children, table, ...props }: DataGridProps<TData>) {
+function DataGrid<TData extends RowData>({ children, table, ...props }: DataGridProps<TData>) {
   const defaultProps: Partial<DataGridProps<TData>> = {
     loadingMode: "skeleton",
     tableLayout: {

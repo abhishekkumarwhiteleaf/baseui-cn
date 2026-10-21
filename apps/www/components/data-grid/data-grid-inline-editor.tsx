@@ -138,9 +138,7 @@ export function DataGridInlineEditor<TValue>({
     void commit(raw)
   }
 
-  const handleKeyDown = (
-    event: ReactKeyboardEvent<HTMLInputElement | HTMLButtonElement>
-  ) => {
+  const handleKeyDown = (event: ReactKeyboardEvent<HTMLElement>) => {
     if (event.key === "Escape") {
       event.preventDefault()
       setError(null)
@@ -203,6 +201,7 @@ export function DataGridInlineEditor<TValue>({
         ref={editorRef}
         className="relative flex h-full min-h-8 w-full items-center"
         onBlurCapture={handlePopupBlur}
+        onKeyDownCapture={handleKeyDown}
       >
         <DatePickerInput
           value={parseDate(draft)}

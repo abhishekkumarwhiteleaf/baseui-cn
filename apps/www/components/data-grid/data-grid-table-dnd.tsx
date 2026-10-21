@@ -41,17 +41,24 @@ import {
 import { horizontalListSortingStrategy, SortableContext, useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import {
-  type Cell,
   flexRender,
-  type Header,
-  type HeaderGroup,
-  type Row,
+  type RowData,
 } from "@tanstack/react-table"
+import type {
+  DataGridCell,
+  DataGridHeader,
+  DataGridHeaderGroup,
+  DataGridRow,
+} from "@/components/data-grid/table-features"
 
 import { Button } from "@/components/ui/button"
 import { GripVerticalIcon } from "lucide-react"
 
-function DataGridTableDndHeader<TData>({ header }: { header: Header<TData, unknown> }) {
+function DataGridTableDndHeader<TData extends RowData>({
+  header,
+}: {
+  header: DataGridHeader<TData, unknown>
+}) {
   const { props } = useDataGrid()
   const { column } = header
 
@@ -104,7 +111,11 @@ function DataGridTableDndHeader<TData>({ header }: { header: Header<TData, unkno
   )
 }
 
-function DataGridTableDndCell<TData>({ cell }: { cell: Cell<TData, unknown> }) {
+function DataGridTableDndCell<TData extends RowData>({
+  cell,
+}: {
+  cell: DataGridCell<TData, unknown>
+}) {
   const { props } = useDataGrid()
   const { isDragging, setNodeRef, transform, transition } = useSortable({
     id: cell.column.id,
@@ -129,7 +140,7 @@ function DataGridTableDndCell<TData>({ cell }: { cell: Cell<TData, unknown> }) {
   )
 }
 
-function DataGridTableDnd<TData>({
+function DataGridTableDnd<TData extends RowData>({
   handleDragEnd,
   footerContent,
 }: {
@@ -137,7 +148,7 @@ function DataGridTableDnd<TData>({
   footerContent?: ReactNode
 }) {
   const { table, isLoading, props } = useDataGrid()
-  const pagination = table.getState().pagination
+  const pagination = table.store.state.pagination
   const containerRef = useRef<HTMLDivElement>(null)
   const [isDraggingColumn, setIsDraggingColumn] = useState(false)
 
@@ -203,11 +214,11 @@ function DataGridTableDnd<TData>({
       >
         <DataGridTableBase>
           <DataGridTableHead>
-            {table.getHeaderGroups().map((headerGroup: HeaderGroup<TData>, index) => {
+            {table.getHeaderGroups().map((headerGroup: DataGridHeaderGroup<TData>, index) => {
               return (
                 <DataGridTableHeadRow headerGroup={headerGroup} key={index}>
                   <SortableContext
-                    items={table.getState().columnOrder}
+                    items={table.store.state.columnOrder}
                     strategy={horizontalListSortingStrategy}
                   >
                     {headerGroup.headers.map((header) => (
@@ -237,15 +248,15 @@ function DataGridTableDnd<TData>({
                 </DataGridTableBodyRowSkeleton>
               ))
             ) : table.getRowModel().rows.length ? (
-              table.getRowModel().rows.map((row: Row<TData>) => {
+              table.getRowModel().rows.map((row) => {
                 return (
                   <Fragment key={row.id}>
                     <DataGridTableBodyRow row={row}>
-                      {row.getVisibleCells().map((cell: Cell<TData, unknown>) => {
+                      {row.getVisibleCells().map((cell) => {
                         return (
                           <SortableContext
                             key={cell.id}
-                            items={table.getState().columnOrder}
+                            items={table.store.state.columnOrder}
                             strategy={horizontalListSortingStrategy}
                           >
                             <DataGridTableDndCell cell={cell} />

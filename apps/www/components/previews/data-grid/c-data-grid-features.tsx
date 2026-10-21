@@ -4,25 +4,25 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { arrayMove } from "@dnd-kit/sortable"
 import type { DragEndEvent } from "@dnd-kit/core"
 import {
-  type ColumnDef,
   type ColumnFiltersState,
   type ColumnOrderState,
   type ColumnPinningState,
-  type Cell,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
   type PaginationState,
-  type Row,
   type SortingState,
-  useReactTable,
+  useTable,
 } from "@tanstack/react-table"
+import type {
+  DataGridCell,
+  DataGridColumnDef,
+  DataGridRow,
+} from "@/components/data-grid/table-features"
+import { dataGridFeatures } from "@/components/data-grid/table-features"
 import { ArrowDownIcon, ArrowUpIcon, PinIcon } from "lucide-react"
 import { DataGrid, DataGridContainer } from "@/components/data-grid/data-grid"
 import type { DataGridColumnEditor } from "@/components/data-grid/data-grid"
 import { DataGridColumnHeader } from "@/components/data-grid/data-grid-column-header"
 import { DataGridEditableCell } from "@/components/data-grid/data-grid-editing"
+import { DataGridActiveFilters } from "@/components/data-grid/data-grid-filter-menu"
 import {
   DataGridInlineEditor,
   type DataGridInlineEditorKind,
@@ -93,6 +93,7 @@ function createInlineRenderer(editorType: DataGridInlineEditorKind) {
     setValue,
     commit,
     cancel,
+    navigate,
     isEditing,
     isPending,
     editor,
@@ -138,6 +139,7 @@ function createInlineRenderer(editorType: DataGridInlineEditorKind) {
         onDraftChange={setValue}
         onCommit={commit}
         onCancel={cancel}
+        onNavigate={navigate}
       />
     )
   }
@@ -147,7 +149,7 @@ function EditableFeatureCell({
   cell,
   enabled,
 }: {
-  cell: Cell<StaffMember, unknown>
+  cell: DataGridCell<StaffMember, unknown>
   enabled: boolean
 }) {
   if (enabled) return <DataGridEditableCell cell={cell} />
@@ -159,7 +161,7 @@ function RowActions({
   pinningEnabled,
   reorderingEnabled,
 }: {
-  row: Row<StaffMember>
+  row: DataGridRow<StaffMember>
   pinningEnabled: boolean
   reorderingEnabled: boolean
 }) {
@@ -208,9 +210,9 @@ function toColumnPreferences(order: ColumnOrderState, pinning: ColumnPinningStat
   return order.map((columnId, orderRank): DataGridColumnPreference => ({
     columnId,
     orderRank,
-    pinPosition: (pinning.left ?? []).includes(columnId)
+    pinPosition: (pinning.start ?? []).includes(columnId)
       ? "left"
-      : (pinning.right ?? []).includes(columnId)
+      : (pinning.end ?? []).includes(columnId)
         ? "right"
         : null,
   }))
@@ -246,15 +248,15 @@ export function DataGridFeaturesPreview() {
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>([
     "rowActions",
     "name",
-    "department",
+    "team",
     "title",
     "salary",
     "startDate",
     "status",
   ])
   const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
-    left: [],
-    right: [],
+    start: [],
+    end: [],
   })
   const query = useMemo(
     () => ({
@@ -296,7 +298,7 @@ export function DataGridFeaturesPreview() {
     []
   )
 
-  const columns = useMemo<ColumnDef<StaffMember>[]>(
+  const columns = useMemo<DataGridColumnDef<StaffMember>[]>(
     () => [
       {
         id: "rowActions",
@@ -341,11 +343,11 @@ export function DataGridFeaturesPreview() {
         cell: ({ cell }) => <EditableFeatureCell cell={cell} enabled={features.inlineEditing} />,
       },
       {
-        accessorKey: "department",
-        id: "department",
+        accessorKey: "team",
+        id: "team",
         header: ({ column }) => (
           <DataGridColumnHeader
-            title="Department"
+            title="Team"
             column={column}
             filterType={features.excelFilters ? "text" : undefined}
           />
@@ -353,10 +355,10 @@ export function DataGridFeaturesPreview() {
         enablePinning: true,
         filterFn: createExcelFilterFn<StaffMember>(),
         meta: {
-          headerTitle: "Department",
+          headerTitle: "Team",
           editor: {
             kind: "select",
-            label: "Department",
+            label: "Team",
             options: [
               { label: "Design", value: "Design" },
               { label: "Engineering", value: "Engineering" },
@@ -423,7 +425,7 @@ export function DataGridFeaturesPreview() {
         id: "startDate",
         header: ({ column }) => (
           <DataGridColumnHeader
-            title="Start date"
+            title="StartDate"
             column={column}
             filterType={features.excelFilters ? "date" : undefined}
           />
@@ -431,10 +433,10 @@ export function DataGridFeaturesPreview() {
         enablePinning: true,
         filterFn: createExcelFilterFn<StaffMember>(),
         meta: {
-          headerTitle: "Start date",
+          headerTitle: "Start Date",
           editor: {
             kind: "text",
-            label: "Start date",
+            label: "Start Date",
             inlineOnly: true,
             renderInline: createInlineRenderer("date"),
           },
@@ -497,7 +499,8 @@ export function DataGridFeaturesPreview() {
     onError: (editError) => reportError(editError),
   })
 
-  const table = useReactTable({
+  const table = useTable({
+    features: dataGridFeatures,
     data: rows,
     columns,
     pageCount: Math.ceil(total / pagination.pageSize),
@@ -519,12 +522,7 @@ export function DataGridFeaturesPreview() {
     onColumnOrderChange: handleColumnOrderChange,
     onColumnPinningChange: handleColumnPinningChange,
     onRowPinningChange: handleRowPinningChange,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel:
-      dataSource.mode === "client" && features.excelFilters ? getFilteredRowModel() : undefined,
-    getSortedRowModel: dataSource.mode === "client" ? getSortedRowModel() : undefined,
-    getPaginationRowModel: dataSource.mode === "client" ? getPaginationRowModel() : undefined,
-    manualFiltering: dataSource.mode === "server",
+    manualFiltering: dataSource.mode === "server" || !features.excelFilters,
     manualSorting: dataSource.mode === "server",
     manualPagination: dataSource.mode === "server",
   })
@@ -543,14 +541,14 @@ export function DataGridFeaturesPreview() {
       if (rightRank === undefined) return -1
       return leftRank - rightRank
     })
-    const left = savedOrder.filter(
+    const start = savedOrder.filter(
       (columnId) => savedPreferences.get(columnId)?.pinPosition === "left"
     )
-    const right = savedOrder.filter(
+    const end = savedOrder.filter(
       (columnId) => savedPreferences.get(columnId)?.pinPosition === "right"
     )
     setColumnOrder(savedOrder)
-    setColumnPinning({ left, right })
+    setColumnPinning({ start, end })
   }, [columnPreferences, table])
 
   useEffect(() => {
@@ -666,6 +664,7 @@ export function DataGridFeaturesPreview() {
             rowsPinnable: features.rowPinning,
           }}
         >
+          <DataGridActiveFilters />
           <DataGridScrollArea className="h-[460px]">
             <DataGridTableDndCombined
               onRowDragEnd={handleRowDragEnd}

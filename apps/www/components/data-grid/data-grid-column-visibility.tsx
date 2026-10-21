@@ -2,7 +2,8 @@
 
 import { type ReactElement } from "react"
 import { getColumnHeaderLabel } from "@/components/data-grid/data-grid"
-import { type Table } from "@tanstack/react-table"
+import type { RowData } from "@tanstack/react-table"
+import type { DataGridTable } from "@/components/data-grid/table-features"
 
 import {
   DropdownMenu,
@@ -13,11 +14,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-function DataGridColumnVisibility<TData>({
+function DataGridColumnVisibility<TData extends RowData>({
   table,
   trigger,
 }: {
-  table: Table<TData>
+  table: DataGridTable<TData>
   trigger: ReactElement<Record<string, unknown>>
 }) {
   return (

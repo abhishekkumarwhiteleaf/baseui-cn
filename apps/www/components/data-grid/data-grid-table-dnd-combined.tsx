@@ -50,13 +50,13 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import {
-  type Cell,
-  flexRender,
-  type Header,
-  type HeaderGroup,
-  type Row,
-} from "@tanstack/react-table"
+import { flexRender, type RowData } from "@tanstack/react-table"
+import type {
+  DataGridCell,
+  DataGridHeader,
+  DataGridHeaderGroup,
+  DataGridRow,
+} from "@/components/data-grid/table-features"
 import { GripHorizontalIcon, GripVerticalIcon } from "lucide-react"
 
 type DragType = "column" | "row"
@@ -67,17 +67,13 @@ const SortableRowContext = createContext<Pick<
   "attributes" | "listeners"
 > | null>(null)
 
-export interface DataGridTableDndCombinedProps<TData> {
+export interface DataGridTableDndCombinedProps<TData extends RowData> {
   onRowDragEnd?: (event: DragEndEvent) => void
   onColumnDragEnd?: (event: DragEndEvent) => void
   footerContent?: ReactNode
 }
 
-function DataGridTableDndCombinedRowHandle({
-  disabled = false,
-}: {
-  disabled?: boolean
-}) {
+function DataGridTableDndCombinedRowHandle({ disabled = false }: { disabled?: boolean }) {
   const context = useContext(SortableRowContext)
 
   return (
@@ -95,11 +91,11 @@ function DataGridTableDndCombinedRowHandle({
   )
 }
 
-function DataGridTableDndCombinedHeader<TData>({
+function DataGridTableDndCombinedHeader<TData extends RowData>({
   header,
   enabled,
 }: {
-  header: Header<TData, unknown>
+  header: DataGridHeader<TData, unknown>
   enabled: boolean
 }) {
   const { props } = useDataGrid()
@@ -142,7 +138,7 @@ function DataGridTableDndCombinedHeader<TData>({
             <GripVerticalIcon className="opacity-60 hover:opacity-100" aria-hidden="true" />
           </Button>
         )}
-        <span className="grow truncate">
+        <span className="min-w-3 grow truncate">
           {header.isPlaceholder
             ? null
             : flexRender(header.column.columnDef.header, header.getContext())}
@@ -155,12 +151,12 @@ function DataGridTableDndCombinedHeader<TData>({
   )
 }
 
-function DataGridTableDndCombinedRow<TData>({
+function DataGridTableDndCombinedRow<TData extends RowData>({
   row,
   pinnedBoundary,
   enabled,
 }: {
-  row: Row<TData>
+  row: DataGridRow<TData>
   pinnedBoundary?: "top" | "bottom"
   enabled: boolean
 }) {
@@ -188,7 +184,7 @@ function DataGridTableDndCombinedRow<TData>({
         dndRef={setNodeRef}
         dndStyle={style}
       >
-        {row.getVisibleCells().map((cell: Cell<TData, unknown>) => (
+        {row.getVisibleCells().map((cell: DataGridCell<TData, unknown>) => (
           <DataGridTableBodyRowCell cell={cell} key={cell.id}>
             {flexRender(cell.column.columnDef.cell, cell.getContext())}
           </DataGridTableBodyRowCell>
@@ -204,13 +200,13 @@ function getActiveDragType(event: DragEndEvent): DragType | undefined {
   return type === "column" || type === "row" ? type : undefined
 }
 
-function DataGridTableDndCombined<TData>({
+function DataGridTableDndCombined<TData extends RowData>({
   onRowDragEnd,
   onColumnDragEnd,
   footerContent,
 }: DataGridTableDndCombinedProps<TData>) {
   const { table, isLoading, props } = useDataGrid()
-  const pagination = table.getState().pagination
+  const pagination = table.store.state.pagination
   const viewportRef = useRef<HTMLDivElement>(null)
   const [draggingType, setDraggingType] = useState<DragType | null>(null)
   const sensors = useSensors(
@@ -218,8 +214,8 @@ function DataGridTableDndCombined<TData>({
     useSensor(TouchSensor, {}),
     useSensor(KeyboardSensor, {})
   )
-  const columnOrder = table.getState().columnOrder.length
-    ? table.getState().columnOrder
+  const columnOrder = table.store.state.columnOrder.length
+    ? table.store.state.columnOrder
     : table.getAllLeafColumns().map((column) => column.id)
   const resolvedRows = getDataGridTableResolvedRows(table, props.tableLayout?.rowsPinnable)
   const rowIds = resolvedRows
@@ -288,7 +284,7 @@ function DataGridTableDndCombined<TData>({
       >
         <DataGridTableBase>
           <DataGridTableHead>
-            {table.getHeaderGroups().map((headerGroup: HeaderGroup<TData>) => (
+            {table.getHeaderGroups().map((headerGroup: DataGridHeaderGroup<TData>) => (
               <DataGridTableHeadRow headerGroup={headerGroup} key={headerGroup.id}>
                 <SortableContext
                   items={columnOrder as UniqueIdentifier[]}

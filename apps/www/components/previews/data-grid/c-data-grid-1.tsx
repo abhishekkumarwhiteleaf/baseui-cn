@@ -9,15 +9,12 @@ import { DataGridScrollArea } from "@/components/data-grid/data-grid-scroll-area
 import { DataGridTable } from "@/components/data-grid/data-grid-table"
 import { createExcelFilterFn } from "@/sections/common-filters"
 import {
-  type ColumnDef,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
   type PaginationState,
   type SortingState,
-  useReactTable,
+  useTable,
 } from "@tanstack/react-table"
+import type { DataGridColumnDef } from "@/components/data-grid/table-features"
+import { dataGridFeatures } from "@/components/data-grid/table-features"
 
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -236,7 +233,7 @@ export function Pattern() {
     }
   }
 
-  const columns = useMemo<ColumnDef<IData>[]>(
+  const columns = useMemo<DataGridColumnDef<IData>[]>(
     () => [
       {
         id: "drag",
@@ -334,7 +331,8 @@ export function Pattern() {
     []
   )
 
-  const table = useReactTable({
+  const table = useTable({
+    features: dataGridFeatures,
     columns,
     data: demoData,
     pageCount: Math.ceil((demoData?.length || 0) / pagination.pageSize),
@@ -346,10 +344,6 @@ export function Pattern() {
     columnResizeMode: "onChange",
     onPaginationChange: setPagination,
     onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
   })
 
   return (

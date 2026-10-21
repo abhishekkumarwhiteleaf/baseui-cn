@@ -4,7 +4,8 @@ import { type HTMLAttributes, memo, type ReactNode, useMemo } from "react"
 import { getColumnHeaderLabel, useDataGrid } from "@/components/data-grid/data-grid"
 import { DataGridFilterMenu } from "@/components/data-grid/data-grid-filter-menu"
 import type { ExcelFilterType } from "@/types/data-grid-filter"
-import { type Column } from "@tanstack/react-table"
+import { type RowData } from "@tanstack/react-table"
+import type { DataGridColumn } from "@/components/data-grid/table-features"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -34,8 +35,11 @@ import {
   Settings2Icon,
 } from "lucide-react"
 
-interface DataGridColumnHeaderProps<TData, TValue> extends HTMLAttributes<HTMLDivElement> {
-  column: Column<TData, TValue>
+interface DataGridColumnHeaderProps<
+  TData extends RowData,
+  TValue,
+> extends HTMLAttributes<HTMLDivElement> {
+  column: DataGridColumn<TData, TValue>
   /** When omitted, uses `column.columnDef.meta.headerTitle`, then a string `columnDef.header`, then `column.id`. */
   title?: string
   icon?: ReactNode
@@ -45,7 +49,7 @@ interface DataGridColumnHeaderProps<TData, TValue> extends HTMLAttributes<HTMLDi
   visibility?: boolean
 }
 
-function DataGridColumnHeaderInner<TData, TValue>({
+function DataGridColumnHeaderInner<TData extends RowData, TValue>({
   column,
   title,
   icon,
@@ -57,8 +61,8 @@ function DataGridColumnHeaderInner<TData, TValue>({
   const { isLoading, table, props, recordCount } = useDataGrid()
   const resolvedTitle = title ?? getColumnHeaderLabel(column)
 
-  const columnOrder = table.getState().columnOrder
-  const columnVisibilityKey = JSON.stringify(table.getState().columnVisibility)
+  const columnOrder = table.store.state.columnOrder
+  const columnVisibilityKey = JSON.stringify(table.store.state.columnVisibility)
   const isSorted = column.getIsSorted()
   const isPinned = column.getIsPinned()
   const canSort = column.getCanSort()
@@ -171,19 +175,19 @@ function DataGridColumnHeaderInner<TData, TValue>({
       items.push(
         <DropdownMenuItem
           key="pin-left"
-          onClick={() => column.pin(isPinned === "left" ? false : "left")}
+          onClick={() => column.pin(isPinned === "start" ? false : "start")}
         >
           <ArrowLeftToLineIcon className="size-3.5!" aria-hidden="true" />
           <span className="grow">Pin to left</span>
-          {isPinned === "left" && <CheckIcon className="text-primary size-4 opacity-100!" />}
+          {isPinned === "start" && <CheckIcon className="text-primary size-4 opacity-100!" />}
         </DropdownMenuItem>,
         <DropdownMenuItem
           key="pin-right"
-          onClick={() => column.pin(isPinned === "right" ? false : "right")}
+          onClick={() => column.pin(isPinned === "end" ? false : "end")}
         >
           <ArrowRightToLineIcon className="size-3.5!" aria-hidden="true" />
           <span className="grow">Pin to right</span>
-          {isPinned === "right" && <CheckIcon className="text-primary size-4 opacity-100!" />}
+          {isPinned === "end" && <CheckIcon className="text-primary size-4 opacity-100!" />}
         </DropdownMenuItem>
       )
       hasPreviousSection = true
@@ -283,20 +287,23 @@ function DataGridColumnHeaderInner<TData, TValue>({
 
   if (hasControls) {
     return (
-      <div className="flex h-full items-center justify-between gap-1.5">
-        <div className="flex min-w-0 items-center gap-1">
+      <div className="flex h-full min-w-0 items-center justify-between gap-1.5">
+        <div className="flex min-w-0 flex-1 items-center gap-1">
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
                 <Button
                   variant="ghost"
-                  className={headerButtonClassName}
+                  className={cn(
+                    headerButtonClassName,
+                    "min-w-0 flex-1 shrink justify-start overflow-hidden "
+                  )}
                   disabled={isLoading || recordCount === 0}
                 />
               }
             >
               {icon && icon}
-              {resolvedTitle}
+              <span className="min-w-0 truncate">{resolvedTitle}</span>
               {sortIcon}
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-40" align="start">
@@ -307,9 +314,9 @@ function DataGridColumnHeaderInner<TData, TValue>({
         </div>
         {props.tableLayout?.columnsPinnable && canPin && isPinned && (
           <Button
-            size="icon-sm"
+            size="icon-xs"
             variant="ghost"
-            className="-me-1 size-7 rounded-md"
+            className="-me-1 size-4 shrink-0 rounded-md"
             onClick={() => column.pin(false)}
             aria-label={`Unpin ${resolvedTitle} column`}
             title={`Unpin ${resolvedTitle} column`}

@@ -1,5 +1,6 @@
 import type { FilterFn, RowData } from "@tanstack/react-table"
 import type { ColumnFilterState } from "@/types/data-grid-filter"
+import type { DataGridFeatures } from "@/components/data-grid/table-features"
 import { matchesDateFilter } from "./matching/date-matching"
 import { matchesNumberFilter } from "./matching/number-matching"
 import { matchesTextFilter } from "./matching/text-matching"
@@ -17,7 +18,7 @@ function isColumnFilterState(value: unknown): value is ColumnFilterState {
   )
 }
 
-export function createExcelFilterFn<TData extends RowData>(): FilterFn<TData> {
+export function createExcelFilterFn<TData extends RowData>(): FilterFn<DataGridFeatures, TData> {
   return (row, columnId, value) => {
     if (!isColumnFilterState(value)) return true
 
