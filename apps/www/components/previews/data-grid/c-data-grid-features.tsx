@@ -16,6 +16,11 @@ import type {
   DataGridColumnDef,
   DataGridRow,
 } from "@/components/data-grid/table-features"
+import {
+  type DataGridFeatures,
+  defaultDataGridFeatures,
+  dataGridFeatureOptions,
+} from "@/hooks/data-grid-feature-config"
 import { dataGridFeatures } from "@/components/data-grid/table-features"
 import { ArrowDownIcon, ArrowUpIcon, PinIcon } from "lucide-react"
 import { DataGrid, DataGridContainer } from "@/components/data-grid/data-grid"
@@ -37,7 +42,7 @@ import {
   createMockStaffDataSource,
   type StaffMember,
   type StaffStatus,
-} from "@/components/previews/data-grid/data-grid-features-data"
+} from "@/hooks/data-grid-features-data"
 import { createExcelFilterFn } from "@/sections/common-filters"
 import { useDataGridFeatureData } from "@/hooks/use-data-grid-feature-data"
 import type { DataGridColumnPreference } from "@/types/data-grid-data-source"
@@ -50,27 +55,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useEditableDataGrid, type EditableDataGridColumn } from "@/hooks/use-editable-data-grid"
 
-type DataGridFeatures = {
-  excelFilters: boolean
-  inlineEditing: boolean
-  rowPinning: boolean
-  rowReordering: boolean
-  columnPinning: boolean
-  columnReordering: boolean
-  columnDragAndDrop: boolean
-}
-
 type StateUpdater<T> = T | ((previous: T) => T)
-
-const initialFeatures: DataGridFeatures = {
-  excelFilters: true,
-  inlineEditing: true,
-  rowPinning: true,
-  rowReordering: true,
-  columnPinning: true,
-  columnReordering: true,
-  columnDragAndDrop: true,
-}
 
 const defaultColumnOrder: ColumnOrderState = [
   "rowActions",
@@ -230,7 +215,7 @@ function toColumnPreferences(order: ColumnOrderState, pinning: ColumnPinningStat
 
 export function DataGridFeaturesPreview() {
   const dataSource = useMemo(() => createMockStaffDataSource(), [])
-  const [features, setFeatures] = useState(initialFeatures)
+  const [features, setFeatures] = useState<DataGridFeatures>(() => ({ ...defaultDataGridFeatures }))
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 5,
@@ -608,16 +593,6 @@ export function DataGridFeaturesPreview() {
     [features.columnDragAndDrop, handleColumnOrderChange]
   )
 
-  const featureToggles: Array<[keyof DataGridFeatures, string]> = [
-    ["excelFilters", "Excel-like filters"],
-    ["inlineEditing", "Inline editing"],
-    ["rowPinning", "Row pinning"],
-    ["rowReordering", "Row reordering"],
-    ["columnPinning", "Column pinning"],
-    ["columnReordering", "Column reordering"],
-    ["columnDragAndDrop", "Column drag and drop"],
-  ]
-
   return (
     <div className="w-full min-w-0 space-y-4">
       {error && (
@@ -635,7 +610,7 @@ export function DataGridFeaturesPreview() {
           recordCount={total}
           isLoading={isLoading}
           featureControls={{
-            features: featureToggles.map(([id, label]) => ({
+            features: dataGridFeatureOptions.map(([id, label]) => ({
               id,
               label,
               checked: features[id],

@@ -90,6 +90,24 @@ const staffRows: StaffMember[] = [
     startDate: "2024-03-04",
     status: "Probation",
   },
+  {
+    id: "staff-1009",
+    name: "Morgan James2",
+    team: "Product",
+    title: "Product Analyst",
+    salary: 85000,
+    startDate: "2024-03-04",
+    status: "Probation",
+  },
+  {
+    id: "staff-10010",
+    name: "Riley Chen2",
+    team: "Operations",
+    title: "Operations Lead",
+    salary: 98000,
+    startDate: "2020-07-20",
+    status: "Active",
+  },
 ]
 
 export function createMockStaffDataSource(): DataGridFeatureDataSource<StaffMember> {
