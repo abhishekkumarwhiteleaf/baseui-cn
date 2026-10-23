@@ -502,17 +502,6 @@
       ]
     },
     {
-      "name": "data-grid-feature-controls",
-      "type": "component",
-      "description": "A reusable dropdown for controlling data-grid features with switches and help text.",
-      "tags": [
-        "data",
-        "table",
-        "interactive"
-      ],
-      "badge": "New"
-    },
-    {
       "name": "empty-state",
       "type": "block",
       "description": "Empty state with icon, title, description, and action.",

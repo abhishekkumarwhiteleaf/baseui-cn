@@ -675,20 +675,6 @@ export const componentMeta = {
     deps: ["@base-ui/react", "class-variance-authority", "lucide-react"],
     registryDeps: ["utils"    ],
   }),
-  "data-grid-feature-controls": defineEntry("data-grid-feature-controls", {
-    section: "Navigation & Data",
-    description:
-      "A reusable dropdown for controlling data-grid features with switches and help text.",
-    tags: ["data", "table", "interactive"],
-    badge: COMPONENT_BADGE,
-    sourcePath: "apps/www/components/data-grid/data-grid-feature-controls.tsx",
-    targetPath: "components/data-grid/data-grid-feature-controls.tsx",
-    installedPath: "components/data-grid/data-grid-feature-controls.tsx",
-    exportName: "DataGridFeatureControls",
-    deps: ["lucide-react"],
-    registryDeps: ["button", "dropdown-menu", "label", "switch", "tooltip"],
-  }),
-
   // Blocks
   "empty-state": defineEntry("empty-state", {
     section: "Blocks",
