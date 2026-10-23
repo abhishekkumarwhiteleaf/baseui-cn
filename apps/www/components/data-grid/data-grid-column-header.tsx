@@ -84,7 +84,7 @@ function DataGridColumnHeaderInner<TData extends RowData, TValue>({
   }
 
   const headerLabelClassName = cn(
-    "text-secondary-foreground/80 inline-flex h-full items-center gap-1.5 font-normal [&_svg]:opacity-60 text-[0.8125rem] leading-[calc(1.125/0.8125)] [&_svg]:size-3.5",
+    "text-secondary-foreground/80 inline-flex h-full  items-center gap-1.5 font-normal [&_svg]:opacity-60 text-[0.8125rem] leading-[calc(1.125/0.8125)] [&_svg]:size-3.5 w-full truncate",
     className
   )
 
@@ -347,7 +347,7 @@ function DataGridColumnHeaderInner<TData extends RowData, TValue>({
   }
 
   return (
-    <div className="flex h-full items-center justify-between gap-1">
+    <div className="flex h-full w-full items-center justify-between gap-1">
       <div className={headerLabelClassName}>
         {icon && icon}
         {resolvedTitle}

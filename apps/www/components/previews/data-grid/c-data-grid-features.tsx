@@ -19,6 +19,7 @@ import type {
 import { dataGridFeatures } from "@/components/data-grid/table-features"
 import { ArrowDownIcon, ArrowUpIcon, PinIcon } from "lucide-react"
 import { DataGrid, DataGridContainer } from "@/components/data-grid/data-grid"
+import { DataGridFeatureControls } from "@/components/data-grid/data-grid-feature-controls"
 import type { DataGridColumnEditor } from "@/components/data-grid/data-grid"
 import { DataGridColumnHeader } from "@/components/data-grid/data-grid-column-header"
 import { DataGridEditableCell } from "@/components/data-grid/data-grid-editing"
@@ -48,8 +49,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
 import { useEditableDataGrid, type EditableDataGridColumn } from "@/hooks/use-editable-data-grid"
 
 type DataGridFeatures = {
@@ -62,6 +61,8 @@ type DataGridFeatures = {
   columnDragAndDrop: boolean
 }
 
+type StateUpdater<T> = T | ((previous: T) => T)
+
 const initialFeatures: DataGridFeatures = {
   excelFilters: true,
   inlineEditing: true,
@@ -71,6 +72,16 @@ const initialFeatures: DataGridFeatures = {
   columnReordering: true,
   columnDragAndDrop: true,
 }
+
+const defaultColumnOrder: ColumnOrderState = [
+  "rowActions",
+  "name",
+  "team",
+  "title",
+  "salary",
+  "startDate",
+  "status",
+]
 
 const statusOptions: Array<{ label: string; value: StaffStatus }> = [
   { label: "Active", value: "Active" },
@@ -218,24 +229,6 @@ function toColumnPreferences(order: ColumnOrderState, pinning: ColumnPinningStat
   }))
 }
 
-function FeatureToggle({
-  label,
-  checked,
-  onCheckedChange,
-}: {
-  label: string
-  checked: boolean
-  onCheckedChange: (checked: boolean) => void
-}) {
-  const id = `data-grid-feature-${label.toLowerCase().replaceAll(" ", "-")}`
-  return (
-    <Label htmlFor={id} className="cursor-pointer">
-      {label}
-      <Switch id={id} checked={checked} onCheckedChange={onCheckedChange} />
-    </Label>
-  )
-}
-
 export function DataGridFeaturesPreview() {
   const dataSource = useMemo(() => createMockStaffDataSource(), [])
   const [features, setFeatures] = useState(initialFeatures)
@@ -245,19 +238,8 @@ export function DataGridFeaturesPreview() {
   })
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>([
-    "rowActions",
-    "name",
-    "team",
-    "title",
-    "salary",
-    "startDate",
-    "status",
-  ])
-  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
-    start: [],
-    end: [],
-  })
+  const [columnOrderOverride, setColumnOrder] = useState<ColumnOrderState | null>(null)
+  const [columnPinningOverride, setColumnPinning] = useState<ColumnPinningState | null>(null)
   const query = useMemo(
     () => ({
       pagination,
@@ -286,16 +268,6 @@ export function DataGridFeaturesPreview() {
       setRowPinning(updater)
     },
     [setRowPinning]
-  )
-
-  const handleColumnOrderChange = useCallback(
-    (updater: Parameters<typeof setColumnOrder>[0]) => setColumnOrder(updater),
-    []
-  )
-
-  const handleColumnPinningChange = useCallback(
-    (updater: Parameters<typeof setColumnPinning>[0]) => setColumnPinning(updater),
-    []
   )
 
   const columns = useMemo<DataGridColumnDef<StaffMember>[]>(
@@ -471,6 +443,49 @@ export function DataGridFeaturesPreview() {
     [features]
   )
 
+  const savedColumnState = useMemo(() => {
+    const savedPreferences = new Map(
+      columnPreferences.map((preference) => [preference.columnId, preference])
+    )
+    const availableIds = columns.flatMap((column) => (column.id ? [column.id] : []))
+    const order = [...availableIds].sort((leftId, rightId) => {
+      const leftRank = savedPreferences.get(leftId)?.orderRank
+      const rightRank = savedPreferences.get(rightId)?.orderRank
+      if (leftRank === undefined) return rightRank === undefined ? 0 : 1
+      if (rightRank === undefined) return -1
+      return leftRank - rightRank
+    })
+    const start = order.filter((columnId) => savedPreferences.get(columnId)?.pinPosition === "left")
+    const end = order.filter((columnId) => savedPreferences.get(columnId)?.pinPosition === "right")
+
+    return {
+      order: columnPreferences.length ? order : defaultColumnOrder,
+      pinning: { start, end },
+    }
+  }, [columnPreferences, columns])
+  const columnOrder = columnOrderOverride ?? savedColumnState.order
+  const columnPinning = columnPinningOverride ?? savedColumnState.pinning
+
+  const handleColumnOrderChange = useCallback(
+    (updater: StateUpdater<ColumnOrderState>) => {
+      setColumnOrder((currentOrder) =>
+        typeof updater === "function" ? updater(currentOrder ?? savedColumnState.order) : updater
+      )
+    },
+    [savedColumnState.order]
+  )
+
+  const handleColumnPinningChange = useCallback(
+    (updater: StateUpdater<ColumnPinningState>) => {
+      setColumnPinning((currentPinning) =>
+        typeof updater === "function"
+          ? updater(currentPinning ?? savedColumnState.pinning)
+          : updater
+      )
+    },
+    [savedColumnState.pinning]
+  )
+
   const editorColumns = useMemo<EditableDataGridColumn<StaffMember>[]>(
     () =>
       columns.flatMap((column) =>
@@ -526,30 +541,6 @@ export function DataGridFeaturesPreview() {
     manualSorting: dataSource.mode === "server",
     manualPagination: dataSource.mode === "server",
   })
-
-  useEffect(() => {
-    if (!columnPreferences.length) return
-
-    const savedPreferences = new Map(
-      columnPreferences.map((preference) => [preference.columnId, preference])
-    )
-    const availableIds = table.getAllLeafColumns().map((column) => column.id)
-    const savedOrder = [...availableIds].sort((leftId, rightId) => {
-      const leftRank = savedPreferences.get(leftId)?.orderRank
-      const rightRank = savedPreferences.get(rightId)?.orderRank
-      if (leftRank === undefined) return rightRank === undefined ? 0 : 1
-      if (rightRank === undefined) return -1
-      return leftRank - rightRank
-    })
-    const start = savedOrder.filter(
-      (columnId) => savedPreferences.get(columnId)?.pinPosition === "left"
-    )
-    const end = savedOrder.filter(
-      (columnId) => savedPreferences.get(columnId)?.pinPosition === "right"
-    )
-    setColumnOrder(savedOrder)
-    setColumnPinning({ start, end })
-  }, [columnPreferences, table])
 
   useEffect(() => {
     if (isLoading) return
@@ -609,13 +600,13 @@ export function DataGridFeaturesPreview() {
   const handleColumnDragEnd = useCallback(
     ({ active, over }: DragEndEvent) => {
       if (!features.columnDragAndDrop || !over || active.id === over.id) return
-      setColumnOrder((currentOrder) => {
+      handleColumnOrderChange((currentOrder) => {
         const from = currentOrder.indexOf(String(active.id))
         const to = currentOrder.indexOf(String(over.id))
         return from < 0 || to < 0 ? currentOrder : arrayMove(currentOrder, from, to)
       })
     },
-    [features.columnDragAndDrop]
+    [features.columnDragAndDrop, handleColumnOrderChange]
   )
 
   const featureToggles: Array<[keyof DataGridFeatures, string]> = [
@@ -630,16 +621,14 @@ export function DataGridFeaturesPreview() {
 
   return (
     <div className="w-full min-w-0 space-y-4">
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-3 rounded-xl border bg-card px-4 py-3">
-        {featureToggles.map(([feature, label]) => (
-          <FeatureToggle
-            key={feature}
-            label={label}
-            checked={features[feature]}
-            onCheckedChange={(checked) => updateFeature(feature, checked)}
-          />
-        ))}
-      </div>
+      <DataGridFeatureControls
+        features={featureToggles.map(([id, label]) => ({
+          id,
+          label,
+          checked: features[id],
+        }))}
+        onFeatureChange={updateFeature}
+      />
 
       {error && (
         <div

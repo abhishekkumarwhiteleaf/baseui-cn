@@ -790,6 +790,22 @@
       "baseUIPrimitive": "NavigationMenu"
     },
     {
+      "name": "data-grid-feature-controls",
+      "type": "component",
+      "section": "Navigation & Data",
+      "label": "Data Grid Feature Controls",
+      "description": "A reusable dropdown for controlling data-grid features with switches and help text.",
+      "tags": [
+        "data",
+        "table",
+        "interactive"
+      ],
+      "version": "1.3.3",
+      "exportName": "DataGridFeatureControls",
+      "installedPath": "components/data-grid/data-grid-feature-controls.tsx",
+      "badge": "New"
+    },
+    {
       "name": "empty-state",
       "type": "block",
       "section": "Blocks",
@@ -1079,6 +1095,11 @@
         {
           "name": "navigation-menu",
           "label": "Navigation Menu"
+        },
+        {
+          "name": "data-grid-feature-controls",
+          "label": "Data Grid Feature Controls",
+          "badge": "New"
         }
       ]
     },

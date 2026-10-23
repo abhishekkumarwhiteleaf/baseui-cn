@@ -38,10 +38,14 @@ The installable includes the reusable family files, the editable-grid hook, and 
 
 <ComponentPreview name="data-grid-demo" />
 
-Use the switches above the table to turn Excel-like filters, inline editing, row pinning,
-row reordering, column pinning, menu-based column reordering, and column drag-and-drop on
-or off independently. The demo uses the existing DataGrid filter menus and editing
-metadata, along with the Base UI CN table and drag-and-drop primitives.
+The reusable feature dropdown used in this example can be installed separately with
+`baseui-cn add data-grid-feature-controls`. It accepts feature labels and checked values as
+props, and reports changes to the grid through a callback.
+
+Use the **Table features** dropdown above the table to turn Excel-like filters, inline
+editing, row pinning, row reordering, column pinning, menu-based column reordering, and
+column drag-and-drop on or off independently. The demo uses the existing DataGrid filter
+menus and editing metadata, along with the Base UI CN table and drag-and-drop primitives.
 
 The rows are provided by a frontend-only data source with a typed query and mutation
 contract. Its mock implementation serves the full dataset for TanStack's client-side

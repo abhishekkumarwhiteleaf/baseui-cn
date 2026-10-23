@@ -1,0 +1,54 @@
+---
+title: Data Grid Feature Controls
+description: A reusable dropdown for toggling data-grid features.
+component: true
+---
+
+The feature controls component renders a dropdown with a switch for each feature you provide.
+It is controlled: your grid owns the feature state and decides how each setting affects its
+behavior.
+
+## Installation
+
+<InstallTabs
+  slug="data-grid-feature-controls"
+  addCmd="baseui-cn add data-grid-feature-controls"
+  manualDeps="npm install lucide-react"
+/>
+
+The CLI also installs the required Base UI CN button, dropdown-menu, label, switch, and tooltip
+components.
+
+## Usage
+
+```tsx
+"use client"
+
+import { useState } from "react"
+import { DataGridFeatureControls } from "@/components/data-grid/data-grid-feature-controls"
+
+type GridFeature = "excelFilters" | "inlineEditing"
+
+export function GridFeatureSettings() {
+  const [features, setFeatures] = useState({
+    excelFilters: true,
+    inlineEditing: false,
+  })
+
+  return (
+    <DataGridFeatureControls
+      features={[
+        { id: "excelFilters", label: "Excel-like filters", checked: features.excelFilters },
+        { id: "inlineEditing", label: "Inline editing", checked: features.inlineEditing },
+      ]}
+      onFeatureChange={(feature, checked) =>
+        setFeatures((current) => ({ ...current, [feature]: checked }))
+      }
+    />
+  )
+}
+```
+
+Each feature `id` is passed to `onFeatureChange` when its switch changes. Use that callback to
+update the same state your table reads. You can customize the trigger label with `label`, the
+help tooltip with `helpText`, and the wrapper classes with `className`.
