@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, type ReactNode, useContext, useMemo } from "react"
+import { createContext, type ReactNode, useContext, useId, useMemo } from "react"
 import {
   type CellData,
   type ColumnFiltersState,
@@ -8,9 +8,27 @@ import {
   type SortingState,
   type TableFeatures,
 } from "@tanstack/react-table"
+import { ChevronDownIcon, CircleHelpIcon, Settings2Icon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import type { DataGridColumn, DataGridTable } from "@/components/data-grid/table-features"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Label } from "@/components/ui/label"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 export type DataGridEditorKind =
   | "text"
@@ -148,7 +166,7 @@ export type DataGridApiResponse<T> = {
 }
 
 export interface DataGridContextProps<TData extends RowData> {
-  props: DataGridProps<TData>
+  props: Omit<DataGridProps<TData>, "featureControls">
   table: DataGridTable<TData>
   recordCount: number
   isLoading: boolean
@@ -161,11 +179,26 @@ export type DataGridRequestParams = {
   columnFilters?: ColumnFiltersState
 }
 
-export interface DataGridProps<TData extends RowData> {
+export interface DataGridFeatureControl<TFeature extends string = string> {
+  id: TFeature
+  label: string
+  checked: boolean
+}
+
+export interface DataGridFeatureControlsConfig<TFeature extends string = string> {
+  features: readonly DataGridFeatureControl<TFeature>[]
+  onFeatureChange: (feature: TFeature, checked: boolean) => void
+  label?: string
+  helpText?: string
+  className?: string
+}
+
+export interface DataGridProps<TData extends RowData, TFeature extends string = string> {
   className?: string
   table?: DataGridTable<TData>
   recordCount: number
   children?: ReactNode
+  featureControls?: DataGridFeatureControlsConfig<TFeature>
   onRowClick?: (row: TData) => void
   isLoading?: boolean
   loadingMode?: "skeleton" | "spinner"
@@ -227,8 +260,10 @@ function DataGridProvider<TData extends RowData>({
   children,
   table,
   ...props
-}: DataGridProps<TData> & { table: DataGridTable<TData> }) {
+}: Omit<DataGridProps<TData>, "featureControls"> & { table: DataGridTable<TData> }) {
   const tableState = table.store.state
+  const tableLayoutKey = JSON.stringify(props.tableLayout)
+  const tableClassNamesKey = JSON.stringify(props.tableClassNames)
 
   // Memoize context value so consumers don't re-render during column resize.
   // Column sizing state is intentionally excluded from deps -- CSS variables
@@ -252,10 +287,8 @@ function DataGridProvider<TData extends RowData>({
       props.emptyMessage,
       props.onRowClick,
       props.className,
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      JSON.stringify(props.tableLayout),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      JSON.stringify(props.tableClassNames),
+      tableLayoutKey,
+      tableClassNamesKey,
       tableState.sorting,
       tableState.pagination,
       tableState.columnFilters,
@@ -275,8 +308,12 @@ function DataGridProvider<TData extends RowData>({
   )
 }
 
-function DataGrid<TData extends RowData>({ children, table, ...props }: DataGridProps<TData>) {
-  const defaultProps: Partial<DataGridProps<TData>> = {
+function DataGrid<TData extends RowData, TFeature extends string = string>({
+  children,
+  table,
+  ...props
+}: DataGridProps<TData, TFeature>) {
+  const defaultProps: Partial<DataGridProps<TData, TFeature>> = {
     loadingMode: "skeleton",
     tableLayout: {
       dense: false,
@@ -309,7 +346,7 @@ function DataGrid<TData extends RowData>({ children, table, ...props }: DataGrid
     },
   }
 
-  const mergedProps: DataGridProps<TData> = {
+  const mergedProps: DataGridProps<TData, TFeature> = {
     ...defaultProps,
     ...props,
     tableLayout: {
@@ -327,10 +364,131 @@ function DataGrid<TData extends RowData>({ children, table, ...props }: DataGrid
     throw new Error('DataGrid requires a "table" prop')
   }
 
+  const { featureControls, ...providerProps } = mergedProps
+
   return (
-    <DataGridProvider table={table} {...mergedProps}>
+    <DataGridProvider table={table} {...providerProps}>
+      {featureControls && <DataGridFeatureControls {...featureControls} />}
       {children}
     </DataGridProvider>
+  )
+}
+
+function DataGridFeatureControls<TFeature extends string>({
+  features,
+  onFeatureChange,
+  label = "Table features",
+  helpText = "Enable or disable features to customize the table.",
+  className,
+}: DataGridFeatureControlsConfig<TFeature>) {
+  const instanceId = useId()
+  const featureGroups = [
+    { label: "Filtering", ids: ["excelFilters"] },
+    { label: "Rows", ids: ["rowPinning", "rowReordering"] },
+    { label: "Columns", ids: ["columnPinning", "columnReordering", "columnDragAndDrop"] },
+    { label: "Editing", ids: ["inlineEditing"] },
+  ]
+  const groupedFeatures = featureGroups
+    .map((group) => ({
+      ...group,
+      features: features.filter((feature) => group.ids.includes(feature.id)),
+    }))
+    .filter((group) => group.features.length > 0)
+  const groupedIds = new Set(
+    groupedFeatures.flatMap((group) => group.features.map((feature) => feature.id))
+  )
+  const ungroupedFeatures = features.filter((feature) => !groupedIds.has(feature.id))
+
+  return (
+    <div className={cn("flex items-center gap-1.5 border-b px-4 py-3", className)}>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={
+            <Button variant="outline" size="sm">
+              <Settings2Icon aria-hidden="true" />
+              {label}
+              <ChevronDownIcon aria-hidden="true" />
+            </Button>
+          }
+        />
+        <DropdownMenuContent align="start" className="w-64">
+          <DropdownMenuGroup>
+            <DropdownMenuLabel className="px-2 pb-1">
+              <span>{label}</span>
+            </DropdownMenuLabel>
+            {groupedFeatures.map((group, index) => (
+              <div key={group.label}>
+                {index > 0 && <DropdownMenuSeparator />}
+                <div className="px-2 pb-1 pt-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  {group.label}
+                </div>
+                <div className="space-y-0.5">
+                  {group.features.map((feature) => {
+                    const id = `${instanceId}-${feature.id}`
+
+                    return (
+                      <Label
+                        key={feature.id}
+                        htmlFor={id}
+                        className="flex w-full cursor-pointer items-center justify-between gap-3 rounded-md px-2 py-1.5 text-sm font-normal hover:bg-accent"
+                      >
+                        <span>{feature.label}</span>
+                        <Checkbox
+                          id={id}
+                          checked={feature.checked}
+                          onCheckedChange={(checked) =>
+                            onFeatureChange(feature.id, checked === true)
+                          }
+                        />
+                      </Label>
+                    )
+                  })}
+                </div>
+              </div>
+            ))}
+            {ungroupedFeatures.length > 0 && (
+              <>
+                {groupedFeatures.length > 0 && <DropdownMenuSeparator />}
+                <div className="space-y-0.5 pt-1">
+                  {ungroupedFeatures.map((feature) => {
+                    const id = `${instanceId}-${feature.id}`
+
+                    return (
+                      <Label
+                        key={feature.id}
+                        htmlFor={id}
+                        className="flex w-full cursor-pointer items-center justify-between gap-3 rounded-md px-2 py-1.5 text-sm font-normal hover:bg-accent"
+                      >
+                        <span>{feature.label}</span>
+                        <Checkbox
+                          id={id}
+                          checked={feature.checked}
+                          onCheckedChange={(checked) =>
+                            onFeatureChange(feature.id, checked === true)
+                          }
+                        />
+                      </Label>
+                    )
+                  })}
+                </div>
+              </>
+            )}
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button variant="ghost" size="icon-sm" aria-label={`About ${label.toLowerCase()}`}>
+                <CircleHelpIcon aria-hidden="true" />
+              </Button>
+            }
+          />
+          <TooltipContent>{helpText}</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </div>
   )
 }
 

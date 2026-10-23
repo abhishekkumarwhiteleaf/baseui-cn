@@ -19,7 +19,6 @@ import type {
 import { dataGridFeatures } from "@/components/data-grid/table-features"
 import { ArrowDownIcon, ArrowUpIcon, PinIcon } from "lucide-react"
 import { DataGrid, DataGridContainer } from "@/components/data-grid/data-grid"
-import { DataGridFeatureControls } from "@/components/data-grid/data-grid-feature-controls"
 import type { DataGridColumnEditor } from "@/components/data-grid/data-grid"
 import { DataGridColumnHeader } from "@/components/data-grid/data-grid-column-header"
 import { DataGridEditableCell } from "@/components/data-grid/data-grid-editing"
@@ -91,7 +90,7 @@ const statusOptions: Array<{ label: string; value: StaffStatus }> = [
 
 function displayCellValue(value: unknown) {
   if (value === null || value === undefined || value === "") return "—"
-  if (typeof value === "number") return `$${new Intl.NumberFormat("en-US").format(value)}`
+  if (typeof value === "number") return `${new Intl.NumberFormat("en-US").format(value)}`
   return String(value)
 }
 
@@ -621,15 +620,6 @@ export function DataGridFeaturesPreview() {
 
   return (
     <div className="w-full min-w-0 space-y-4">
-      <DataGridFeatureControls
-        features={featureToggles.map(([id, label]) => ({
-          id,
-          label,
-          checked: features[id],
-        }))}
-        onFeatureChange={updateFeature}
-      />
-
       {error && (
         <div
           role="alert"
@@ -644,6 +634,14 @@ export function DataGridFeaturesPreview() {
           table={table}
           recordCount={total}
           isLoading={isLoading}
+          featureControls={{
+            features: featureToggles.map(([id, label]) => ({
+              id,
+              label,
+              checked: features[id],
+            })),
+            onFeatureChange: updateFeature,
+          }}
           tableLayout={{
             columnsResizable: true,
             columnsDraggable: features.columnDragAndDrop,

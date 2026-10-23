@@ -602,6 +602,7 @@ function DataGridTableHeadRowCell<TData extends RowData>({
       className={cn(
         "text-secondary-foreground/80 h-10 relative text-left align-middle font-normal rtl:text-right [&:has([role=checkbox])]:pe-0",
         headerCellSpacing,
+        "data-pinned:px-2",
         props.tableLayout?.cellBorder && "border-e",
         props.tableLayout?.columnsResizable && column.getCanResize() && "overflow-visible",
         props.tableLayout?.columnsResizable &&

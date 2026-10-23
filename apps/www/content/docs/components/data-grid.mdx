@@ -38,9 +38,27 @@ The installable includes the reusable family files, the editable-grid hook, and 
 
 <ComponentPreview name="data-grid-demo" />
 
-The reusable feature dropdown used in this example can be installed separately with
-`baseui-cn add data-grid-feature-controls`. It accepts feature labels and checked values as
-props, and reports changes to the grid through a callback.
+Feature controls are built into `DataGrid` and can be enabled in any grid with the optional
+`featureControls` prop:
+
+```tsx
+<DataGrid
+  table={table}
+  recordCount={rows.length}
+  featureControls={{
+    features: [
+      { id: "inlineEditing", label: "Inline editing", checked: inlineEditing },
+      { id: "columnPinning", label: "Column pinning", checked: columnPinning },
+    ],
+    onFeatureChange: (feature, checked) => {
+      if (feature === "inlineEditing") setInlineEditing(checked)
+      if (feature === "columnPinning") setColumnPinning(checked)
+    },
+  }}
+>
+  <DataGridTable />
+</DataGrid>
+```
 
 Use the **Table features** dropdown above the table to turn Excel-like filters, inline
 editing, row pinning, row reordering, column pinning, menu-based column reordering, and
