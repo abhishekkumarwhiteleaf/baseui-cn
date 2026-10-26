@@ -165,7 +165,8 @@ function RowActions({
 
   return (
     <div className="flex items-center gap-1">
-      <DataGridTableDndCombinedRowHandle disabled={!reorderingEnabled || Boolean(pinPosition)} />
+      {reorderingEnabled && <DataGridTableDndCombinedRowHandle disabled={Boolean(pinPosition)} />}
+
       {pinningEnabled && (
         <DropdownMenu>
           <DropdownMenuTrigger

@@ -22,11 +22,7 @@ import {
   TEXT_OPERATOR_LABELS,
   formatFilterLabel,
 } from "@/sections/common-filters"
-import {
-  validateDateFilter,
-  validateNumberFilter,
-  validateTextFilter,
-} from "@/sections/validation"
+import { validateDateFilter, validateNumberFilter, validateTextFilter } from "@/sections/validation"
 import type {
   ColumnFilterState,
   DateOperator,
@@ -117,23 +113,13 @@ export function DataGridActiveFilters() {
           {activeFilters.length}
         </Badge>
       </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        className="shrink-0"
-        onClick={clearAll}
-      >
+      <Button type="button" variant="ghost" size="sm" className="shrink-0" onClick={clearAll}>
         Clear all
       </Button>
       {showFilters && (
         <div className="flex min-w-0 flex-1 flex-wrap gap-1.5">
           {activeFilters.map((filter) => (
-            <Badge
-              key={filter.id}
-              variant="secondary"
-              className="max-w-full gap-1 py-1"
-            >
+            <Badge key={filter.id} variant="secondary" className="max-w-full gap-1 py-1">
               <span className="truncate">{filter.label}</span>
               <button
                 type="button"
@@ -188,16 +174,16 @@ export function DataGridFilterMenu<TData extends RowData, TValue>({
   title,
 }: DataGridFilterMenuProps<TData, TValue>) {
   const [open, setOpen] = useState(false)
-  const [collisionBoundary, setCollisionBoundary] = useState<Element | null>(null)
+  const [collisionBoundary, setCollisionBoundary] = useState<HTMLElement | null>(null)
   const [draft, setDraft] = useState<ColumnFilterState>(() =>
     initialFilter(type, column.getFilterValue())
   )
   const [error, setError] = useState<string | null>(null)
   const activeFilter = column.getFilterValue() !== undefined
   const setTriggerRef = useCallback((node: HTMLButtonElement | null) => {
-    if (node) {
-      setCollisionBoundary(node.closest('[data-slot="data-grid"]'))
-    }
+    const viewport = node?.closest<HTMLElement>('[data-slot="scroll-area-viewport"]') ?? null
+
+    setCollisionBoundary((current) => (current === viewport ? current : viewport))
   }, [])
 
   const updateDraft = (nextDraft: ColumnFilterState) => {
@@ -259,9 +245,15 @@ export function DataGridFilterMenu<TData extends RowData, TValue>({
       </PopoverTrigger>
       <PopoverContent
         align="start"
-        collisionBoundary={collisionBoundary ?? undefined}
+        collisionBoundary={collisionBoundary ?? "clipping-ancestors"}
         collisionPadding={8}
-        sticky
+        collisionAvoidance={{
+          side: "flip",
+          align: "shift",
+        }}
+        sticky={false}
+        disableAnchorTracking={false}
+        positionMethod="fixed"
         className="max-h-[min(24rem,calc(100dvh-1rem))] w-[min(14rem,calc(100vw-1rem))] gap-0 overflow-y-auto p-3"
       >
         <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">

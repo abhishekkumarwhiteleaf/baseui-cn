@@ -19,9 +19,15 @@ function PopoverContent({
   alignOffset = 0,
   side = "bottom",
   sideOffset = 4,
-  collisionBoundary,
-  collisionPadding,
-  sticky,
+  collisionBoundary = "clipping-ancestors",
+  collisionPadding = 8,
+  collisionAvoidance = {
+    side: "flip",
+    align: "shift",
+  },
+  sticky = false,
+  disableAnchorTracking = false,
+  positionMethod = "fixed",
   ...props
 }: PopoverPrimitive.Popup.Props &
   Pick<
@@ -30,20 +36,26 @@ function PopoverContent({
     | "alignOffset"
     | "collisionBoundary"
     | "collisionPadding"
+    | "collisionAvoidance"
     | "side"
     | "sideOffset"
     | "sticky"
+    | "disableAnchorTracking"
+    | "positionMethod"
   >) {
   return (
     <PopoverPrimitive.Portal>
       <PopoverPrimitive.Positioner
         align={align}
         alignOffset={alignOffset}
-        collisionBoundary={collisionBoundary}
-        collisionPadding={collisionPadding}
         side={side}
         sideOffset={sideOffset}
+        collisionBoundary={collisionBoundary}
+        collisionPadding={collisionPadding}
+        collisionAvoidance={collisionAvoidance}
         sticky={sticky}
+        disableAnchorTracking={disableAnchorTracking}
+        positionMethod={positionMethod}
         className="isolate z-50"
       >
         <PopoverPrimitive.Popup
@@ -51,7 +63,7 @@ function PopoverContent({
           className={cn(
             "bg-popover text-popover-foreground",
             "data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0",
-            "data-closed:zoom-out-95 data-open:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 ",
+            "data-closed:zoom-out-95 data-open:zoom-in-95 data-[side=bottom]:slide-in-from-top-2",
             "data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2",
             "data-[side=top]:slide-in-from-bottom-2 ring-foreground/5 flex flex-col gap-4 rounded-xl",
             "p-4 text-sm shadow-2xl ring-1 duration-100",
