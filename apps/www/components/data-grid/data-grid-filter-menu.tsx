@@ -22,7 +22,11 @@ import {
   TEXT_OPERATOR_LABELS,
   formatFilterLabel,
 } from "@/sections/common-filters"
-import { validateDateFilter, validateNumberFilter, validateTextFilter } from "@/sections/validation"
+import {
+  validateDateFilter,
+  validateNumberFilter,
+  validateTextFilter,
+} from "@/sections/validation"
 import type {
   ColumnFilterState,
   DateOperator,
