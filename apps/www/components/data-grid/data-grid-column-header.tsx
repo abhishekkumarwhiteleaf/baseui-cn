@@ -1,6 +1,6 @@
 "use client"
 
-import { type HTMLAttributes, memo, type ReactNode, useMemo } from "react"
+import { type HTMLAttributes, memo, type ReactNode, useCallback, useMemo, useState } from "react"
 import { getColumnHeaderLabel, useDataGrid } from "@/components/data-grid/data-grid"
 import { DataGridFilterMenu } from "@/components/data-grid/data-grid-filter-menu"
 import type { ExcelFilterType } from "@/types/data-grid-filter"
@@ -59,6 +59,13 @@ function DataGridColumnHeaderInner<TData extends RowData, TValue>({
   visibility = false,
 }: DataGridColumnHeaderProps<TData, TValue>) {
   const { isLoading, table, props, recordCount } = useDataGrid()
+  const [collisionBoundary, setCollisionBoundary] = useState<HTMLElement | null>(null)
+
+  const headerRef = useCallback((node: HTMLDivElement | null) => {
+    const viewport = node?.closest<HTMLElement>('[data-slot="scroll-area-viewport"]') ?? null
+
+    setCollisionBoundary((current) => (current === viewport ? current : viewport))
+  }, [])
   const resolvedTitle = title ?? getColumnHeaderLabel(column)
 
   const columnOrder = table.store.state.columnOrder
@@ -288,7 +295,7 @@ function DataGridColumnHeaderInner<TData extends RowData, TValue>({
 
   if (hasControls) {
     return (
-      <div className="flex h-full min-w-0 items-center justify-between gap-1.5">
+      <div ref={headerRef} className="flex h-full min-w-0 items-center justify-between gap-1.5">
         <div className="flex min-w-0 flex-1 items-center gap-1">
           <DropdownMenu>
             <DropdownMenuTrigger
@@ -297,7 +304,7 @@ function DataGridColumnHeaderInner<TData extends RowData, TValue>({
                   variant="ghost"
                   className={cn(
                     headerButtonClassName,
-                    "min-w-0 flex-1 shrink justify-start overflow-hidden "
+                    "min-w-0 flex-1 shrink justify-start overflow-hidden"
                   )}
                   disabled={isLoading || recordCount === 0}
                 />
@@ -307,7 +314,16 @@ function DataGridColumnHeaderInner<TData extends RowData, TValue>({
               <span className="min-w-0 truncate">{resolvedTitle}</span>
               {sortIcon}
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-40" align="start">
+            <DropdownMenuContent
+              className="w-40"
+              align="start"
+              collisionBoundary={collisionBoundary ?? "clipping-ancestors"}
+              collisionPadding={8}
+              collisionAvoidance={{
+                side: "flip",
+                align: "shift",
+              }}
+            >
               {menuItems}
             </DropdownMenuContent>
           </DropdownMenu>
