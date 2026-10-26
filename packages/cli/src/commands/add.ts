@@ -47,7 +47,9 @@ function resolveInstallFilePath(
   if (
     normalizedPath.startsWith("components/") ||
     normalizedPath.startsWith("hooks/") ||
-    normalizedPath.startsWith("styles/")
+    normalizedPath.startsWith("styles/") ||
+    normalizedPath.startsWith("types/") ||
+    normalizedPath.startsWith("sections/")
   ) {
     return path.resolve(projectSourceRoot, normalizedPath)
   }

@@ -500,7 +500,9 @@ export const componentMeta = {
       "@tanstack/react-table",
       "@tanstack/react-virtual",
       "class-variance-authority",
+      "clsx",
       "lucide-react",
+      "tailwind-merge",
     ],
     registryDeps: [
       "utils",
@@ -524,11 +526,16 @@ export const componentMeta = {
       "spinner",
       "switch",
       "textarea",
+      "tooltip",
     ],
     files: [
       {
         sourcePath: "apps/www/components/data-grid/data-grid.tsx",
         targetPath: "components/data-grid/data-grid.tsx",
+      },
+      {
+        sourcePath: "apps/www/components/data-grid/table-features.ts",
+        targetPath: "components/data-grid/table-features.ts",
       },
       {
         sourcePath: "apps/www/components/data-grid/data-grid-column-filter.tsx",
@@ -551,6 +558,10 @@ export const componentMeta = {
         targetPath: "components/data-grid/data-grid-editing.tsx",
       },
       {
+        sourcePath: "apps/www/components/data-grid/data-grid-inline-editor.tsx",
+        targetPath: "components/data-grid/data-grid-inline-editor.tsx",
+      },
+      {
         sourcePath: "apps/www/components/data-grid/data-grid-pagination.tsx",
         targetPath: "components/data-grid/data-grid-pagination.tsx",
       },
@@ -569,6 +580,10 @@ export const componentMeta = {
       {
         sourcePath: "apps/www/components/data-grid/data-grid-table-dnd-rows.tsx",
         targetPath: "components/data-grid/data-grid-table-dnd-rows.tsx",
+      },
+      {
+        sourcePath: "apps/www/components/data-grid/data-grid-table-dnd-combined.tsx",
+        targetPath: "components/data-grid/data-grid-table-dnd-combined.tsx",
       },
       {
         sourcePath: "apps/www/components/data-grid/data-grid-table-virtual.tsx",

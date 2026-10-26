@@ -10,7 +10,7 @@
     {
       "path": "form.tsx",
       "type": "component",
-      "content": "\"use client\"\n\nimport { Form as FormPrimitive } from \"@base-ui/react/form\"\nimport type React from \"react\"\nimport { cn } from \"@/lib/utils\"\n\nexport function Form<TValues extends object = object>({\n  className,\n  ...props\n}: FormPrimitive.Props<TValues>): React.ReactElement {\n  return (\n    <FormPrimitive\n      className={cn(\"flex w-full flex-col gap-4\", className)}\n      data-slot=\"form\"\n      {...props}\n    />\n  )\n}\n\nexport { FormPrimitive }\n"
+      "content": "\"use client\"\r\n\r\nimport { Form as FormPrimitive } from \"@base-ui/react/form\"\r\nimport type React from \"react\"\r\nimport { cn } from \"@/lib/utils\"\r\n\r\nexport function Form<TValues extends object = object>({\r\n  className,\r\n  ...props\r\n}: FormPrimitive.Props<TValues>): React.ReactElement {\r\n  return (\r\n    <FormPrimitive\r\n      className={cn(\"flex w-full flex-col gap-4\", className)}\r\n      data-slot=\"form\"\r\n      {...props}\r\n    />\r\n  )\r\n}\r\n\r\nexport { FormPrimitive }\r\n"
     }
   ],
   "dependencies": {
