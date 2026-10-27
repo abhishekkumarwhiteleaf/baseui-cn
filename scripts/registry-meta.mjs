@@ -546,6 +546,14 @@ export const componentMeta = {
         targetPath: "components/data-grid/data-grid-filter-menu.tsx",
       },
       {
+        sourcePath: "apps/www/components/data-grid/data-grid-filter-client.ts",
+        targetPath: "components/data-grid/data-grid-filter-client.ts",
+      },
+      {
+        sourcePath: "apps/www/components/data-grid/data-grid-filter-server.ts",
+        targetPath: "components/data-grid/data-grid-filter-server.ts",
+      },
+      {
         sourcePath: "apps/www/components/data-grid/data-grid-column-header.tsx",
         targetPath: "components/data-grid/data-grid-column-header.tsx",
       },
@@ -596,62 +604,6 @@ export const componentMeta = {
       {
         sourcePath: "apps/www/types/data-grid-filter.ts",
         targetPath: "types/data-grid-filter.ts",
-      },
-      {
-        sourcePath: "apps/www/sections/common-filters/index.ts",
-        targetPath: "sections/common-filters/index.ts",
-      },
-      {
-        sourcePath: "apps/www/sections/common-filters/date.ts",
-        targetPath: "sections/common-filters/date.ts",
-      },
-      {
-        sourcePath: "apps/www/sections/common-filters/filter-function.ts",
-        targetPath: "sections/common-filters/filter-function.ts",
-      },
-      {
-        sourcePath: "apps/www/sections/common-filters/filter-label.ts",
-        targetPath: "sections/common-filters/filter-label.ts",
-      },
-      {
-        sourcePath: "apps/www/sections/common-filters/number.ts",
-        targetPath: "sections/common-filters/number.ts",
-      },
-      {
-        sourcePath: "apps/www/sections/common-filters/text.ts",
-        targetPath: "sections/common-filters/text.ts",
-      },
-      {
-        sourcePath: "apps/www/sections/common-filters/matching/date-matching.ts",
-        targetPath: "sections/common-filters/matching/date-matching.ts",
-      },
-      {
-        sourcePath: "apps/www/sections/common-filters/matching/number-matching.ts",
-        targetPath: "sections/common-filters/matching/number-matching.ts",
-      },
-      {
-        sourcePath: "apps/www/sections/common-filters/matching/text-matching.ts",
-        targetPath: "sections/common-filters/matching/text-matching.ts",
-      },
-      {
-        sourcePath: "apps/www/sections/validation/index.ts",
-        targetPath: "sections/validation/index.ts",
-      },
-      {
-        sourcePath: "apps/www/sections/validation/date-validation.ts",
-        targetPath: "sections/validation/date-validation.ts",
-      },
-      {
-        sourcePath: "apps/www/sections/validation/number-validation.ts",
-        targetPath: "sections/validation/number-validation.ts",
-      },
-      {
-        sourcePath: "apps/www/sections/validation/text-validation.ts",
-        targetPath: "sections/validation/text-validation.ts",
-      },
-      {
-        sourcePath: "apps/www/sections/validation/validation-result.ts",
-        targetPath: "sections/validation/validation-result.ts",
       },
       {
         sourcePath: "apps/www/components/ui/rating.tsx",
