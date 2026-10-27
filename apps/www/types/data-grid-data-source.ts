@@ -1,10 +1,7 @@
-import type { ColumnFiltersState, PaginationState, RowPinningState, SortingState } from "@tanstack/react-table"
+import type { RowPinningState } from "@tanstack/react-table"
+import type { DataGridQuery } from "@/components/data-grid/data-grid-filter-server"
 
-export interface DataGridQuery {
-  pagination: PaginationState
-  sorting: SortingState
-  columnFilters: ColumnFiltersState
-}
+export type { DataGridQuery } from "@/components/data-grid/data-grid-filter-server"
 
 export interface DataGridPage<TData> {
   rows: TData[]

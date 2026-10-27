@@ -43,7 +43,7 @@ import {
   type StaffMember,
   type StaffStatus,
 } from "@/hooks/data-grid-features-data"
-import { createExcelFilterFn } from "@/sections/common-filters"
+import { createExcelFilterFn } from "@/components/data-grid/data-grid-filter-client"
 import { useDataGridFeatureData } from "@/hooks/use-data-grid-feature-data"
 import type { DataGridColumnPreference } from "@/types/data-grid-data-source"
 import { useEditableDataGrid, type EditableDataGridColumn } from "@/hooks/use-editable-data-grid"

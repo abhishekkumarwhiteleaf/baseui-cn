@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useState } from "react"
 import type {
   DataGridFeatureDataSource,
-  DataGridQuery,
 } from "@/types/data-grid-data-source"
+import type { DataGridQuery } from "@/components/data-grid/data-grid-filter-server"
 import type { DataGridColumnPreference } from "@/types/data-grid-data-source"
 import type { RowPinningState } from "@tanstack/react-table"
 

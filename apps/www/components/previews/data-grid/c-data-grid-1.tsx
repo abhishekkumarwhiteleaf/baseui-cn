@@ -7,7 +7,7 @@ import { DataGridColumnHeader } from "@/components/data-grid/data-grid-column-he
 import { DataGridPagination } from "@/components/data-grid/data-grid-pagination"
 import { DataGridScrollArea } from "@/components/data-grid/data-grid-scroll-area"
 import { DataGridTable } from "@/components/data-grid/data-grid-table"
-import { createExcelFilterFn } from "@/sections/common-filters"
+import { createExcelFilterFn } from "@/components/data-grid/data-grid-filter-client"
 import {
   type PaginationState,
   type SortingState,

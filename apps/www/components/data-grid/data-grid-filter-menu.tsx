@@ -21,12 +21,10 @@ import {
   TEXT_OPERATORS,
   TEXT_OPERATOR_LABELS,
   formatFilterLabel,
-} from "@/sections/common-filters"
-import {
   validateDateFilter,
   validateNumberFilter,
   validateTextFilter,
-} from "@/sections/validation"
+} from "@/components/data-grid/data-grid-filter-client"
 import type {
   ColumnFilterState,
   DateOperator,
