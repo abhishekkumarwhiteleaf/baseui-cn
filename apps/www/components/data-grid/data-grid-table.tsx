@@ -27,9 +27,17 @@ import type {
   DataGridTable as DataGridTableInstance,
 } from "@/components/data-grid/table-features"
 import { cva } from "class-variance-authority"
+import { ArrowDownIcon, ArrowUpIcon, PinIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Spinner } from "@/components/ui/spinner"
 
 const headerCellSpacingVariants = cva("", {
@@ -1079,52 +1087,44 @@ function DataGridTableLoader() {
 }
 
 function DataGridTableRowPin<TData extends RowData>({ row }: { row: DataGridRow<TData> }) {
+  const { props } = useDataGrid()
+  if (!props.tableLayout?.rowsPinnable || !row.getCanPin()) return null
+
   const isPinned = row.getIsPinned()
+  const label = isPinned ? `Row pinned to ${isPinned}` : "Pin row"
 
   return (
-    <button
-      type="button"
-      aria-label={isPinned ? "Unpin row" : "Pin row"}
-      onClick={() => {
-        if (isPinned) {
-          row.pin(false)
-        } else {
-          row.pin("top")
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            aria-label={label}
+            title={label}
+            className={cn(
+              "text-muted-foreground hover:text-foreground",
+              isPinned && "text-primary hover:text-primary/80"
+            )}
+            onClick={(event) => event.stopPropagation()}
+          />
         }
-      }}
-      className={cn(
-        "text-muted-foreground hover:text-foreground inline-flex size-7 items-center justify-center rounded-md transition-colors",
-        isPinned && "text-primary hover:text-primary/80"
-      )}
-    >
-      {isPinned ? (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          stroke="none"
-        >
-          <path d="M16 2l4.585 4.586-2.122 2.121L17.05 7.293l-3.535 3.536 1.413 5.658-2.12 2.121-4.244-4.243L4.322 18.6l-1.414-1.41 4.242-4.244-4.243-4.243 2.122-2.121 5.656 1.414 3.536-3.536-1.414-1.414z" />
-        </svg>
-      ) : (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <line x1="12" y1="17" x2="12" y2="22" />
-          <path d="M5 17h14v-1.76a2 2 0 00-1.11-1.79l-1.78-.9A2 2 0 0115 10.76V6h1a2 2 0 000-4H8a2 2 0 000 4h1v4.76a2 2 0 01-1.11 1.79l-1.78.9A2 2 0 005 15.24z" />
-        </svg>
-      )}
-    </button>
+      >
+        <PinIcon className="size-4" aria-hidden="true" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="min-w-36">
+        <DropdownMenuItem onClick={() => row.pin("top")}>
+          <ArrowUpIcon className="size-3.5" />
+          Pin to top
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => row.pin("bottom")}>
+          <ArrowDownIcon className="size-3.5" />
+          Pin to bottom
+        </DropdownMenuItem>
+        {isPinned && <DropdownMenuItem onClick={() => row.pin(false)}>Unpin row</DropdownMenuItem>}
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 

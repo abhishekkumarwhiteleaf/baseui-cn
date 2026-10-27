@@ -22,7 +22,6 @@ import {
   dataGridFeatureOptions,
 } from "@/hooks/data-grid-feature-config"
 import { dataGridFeatures } from "@/components/data-grid/table-features"
-import { ArrowDownIcon, ArrowUpIcon, PinIcon } from "lucide-react"
 import { DataGrid, DataGridContainer } from "@/components/data-grid/data-grid"
 import type { DataGridColumnEditor } from "@/components/data-grid/data-grid"
 import { DataGridColumnHeader } from "@/components/data-grid/data-grid-column-header"
@@ -38,6 +37,7 @@ import {
   DataGridTableDndCombined,
   DataGridTableDndCombinedRowHandle,
 } from "@/components/data-grid/data-grid-table-dnd-combined"
+import { DataGridTableRowPin } from "@/components/data-grid/data-grid-table"
 import {
   createMockStaffDataSource,
   type StaffMember,
@@ -46,13 +46,6 @@ import {
 import { createExcelFilterFn } from "@/sections/common-filters"
 import { useDataGridFeatureData } from "@/hooks/use-data-grid-feature-data"
 import type { DataGridColumnPreference } from "@/types/data-grid-data-source"
-import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { useEditableDataGrid, type EditableDataGridColumn } from "@/hooks/use-editable-data-grid"
 
 type StateUpdater<T> = T | ((previous: T) => T)
@@ -153,51 +146,17 @@ function EditableFeatureCell({
 
 function RowActions({
   row,
-  pinningEnabled,
   reorderingEnabled,
 }: {
   row: DataGridRow<StaffMember>
-  pinningEnabled: boolean
   reorderingEnabled: boolean
 }) {
   const pinPosition = row.getIsPinned()
-  const label = pinPosition ? `Row pinned to ${pinPosition}` : "Pin row"
 
   return (
     <div className="flex items-center gap-1">
       {reorderingEnabled && <DataGridTableDndCombinedRowHandle disabled={Boolean(pinPosition)} />}
-
-      {pinningEnabled && (
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                className={pinPosition ? "text-primary" : "text-muted-foreground"}
-                aria-label={label}
-                title={label}
-                onClick={(event) => event.stopPropagation()}
-              />
-            }
-          >
-            <PinIcon className="size-4" aria-hidden="true" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="min-w-36">
-            <DropdownMenuItem onClick={() => row.pin("top")}>
-              <ArrowUpIcon className="size-3.5" />
-              Pin to top
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => row.pin("bottom")}>
-              <ArrowDownIcon className="size-3.5" />
-              Pin to bottom
-            </DropdownMenuItem>
-            {pinPosition && (
-              <DropdownMenuItem onClick={() => row.pin(false)}>Unpin row</DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
+      <DataGridTableRowPin row={row} />
     </div>
   )
 }
@@ -263,7 +222,6 @@ export function DataGridFeaturesPreview() {
         cell: ({ row }) => (
           <RowActions
             row={row}
-            pinningEnabled={features.rowPinning}
             reorderingEnabled={features.rowReordering}
           />
         ),
