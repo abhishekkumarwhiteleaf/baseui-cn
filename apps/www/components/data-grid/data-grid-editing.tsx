@@ -21,10 +21,7 @@ import {
 } from "@/components/ui/number-field"
 import { Rating } from "@/components/ui/rating"
 import type { RowData } from "@tanstack/react-table"
-import type {
-  DataGridCell,
-  DataGridTable,
-} from "@/components/data-grid/table-features"
+import type { DataGridCell, DataGridTable } from "@/components/data-grid/table-features"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -206,7 +203,6 @@ function renderSelectField<TData extends EditableRow>({
     </Select>
   )
 }
-
 function DataGridInlineSelectEditor<TData extends EditableRow>(
   props: DataGridColumnEditorRenderProps<TData, unknown>
 ) {
@@ -757,8 +753,7 @@ export function DataGridEditableCell<TData extends EditableRow, TValue = unknown
   const table = cell.getContext().table
   const editing = table.options.meta?.editing
   const editor = getDataGridColumnEditor(cell.column) as
-    | DataGridColumnEditor<TData, unknown>
-    | undefined
+    DataGridColumnEditor<TData, unknown> | undefined
 
   if (!editing || !editor) {
     return <div className={className}>{renderStaticCellValue(cell, emptyLabel)}</div>
@@ -772,14 +767,12 @@ export function DataGridEditableCell<TData extends EditableRow, TValue = unknown
   const error = editing.getCellError(rowId, columnId)
   const value = editing.getCellDraftValue(row, columnId)
   const navigate = (direction: "next" | "previous") => {
-    const editableCells = table
-      .getRowModel()
-      .rows.flatMap((visibleRow) =>
-        visibleRow.getVisibleCells().filter((visibleCell) => {
-          const visibleEditor = getDataGridColumnEditor(visibleCell.column)
-          return visibleEditor && !visibleEditor.dialogOnly
-        })
-      )
+    const editableCells = table.getRowModel().rows.flatMap((visibleRow) =>
+      visibleRow.getVisibleCells().filter((visibleCell) => {
+        const visibleEditor = getDataGridColumnEditor(visibleCell.column)
+        return visibleEditor && !visibleEditor.dialogOnly
+      })
+    )
     const activeIndex = editableCells.findIndex(
       (visibleCell) => visibleCell.row.id === rowId && visibleCell.column.id === columnId
     )
@@ -871,8 +864,7 @@ export function DataGridEditDialog<TData extends EditableRow>({
               <div className="flex flex-col gap-4">
                 {editableColumns.map((column) => {
                   const editor = getDataGridColumnEditor(column) as
-                    | DataGridColumnEditor<TData, unknown>
-                    | undefined
+                    DataGridColumnEditor<TData, unknown> | undefined
 
                   if (!editor) {
                     return null
